@@ -4,240 +4,240 @@ libname raw "F:\portfolio\raw"; /*copy raw data to this folder*/
 libname smoke "F:\Smoking cessation"; /*original dataset*/
 
 
-/**********************main program*********************/
+/**********************************main program**********************************/
 /*------------------------------------------------------------------------------*/
 /*part 0: import and back up the data                                           */
 /*------------------------------------------------------------------------------*/
-/*part1: merge data, select the variables, modify the variable name*/
+/*part1: merge data, select the variables, modify the variable name             */
 /*------------------------------------------------------------------------------*/
-/*part2: modify variables                                                            */
-/*         part2-1: modify error id                                                  */
-/*         part2-2: modify error birthday                                         */
-/*         part2-3: modify smokedaynum and smokescore                */
-/*         part2-4: modify the format of the variables                       */
+/*part2: modify variables                                                       */
+/*  part2-1: modify error id                                                    */
+/*  part2-2: modify error birthday                                              */
+/*  part2-3: modify smokedaynum and smokescore                                  */
+/*  part2-4: modify the format of the variables                                 */
 /*------------------------------------------------------------------------------*/
-/*part3: screening sample                                                           */
+/*part3: screening sample                                                       */
 /*------------------------------------------------------------------------------*/
-/*part4: create variables which in reserch                                    */
+/*part4: create variables which in reserch                                      */
 /*------------------------------------------------------------------------------*/
-/*part5: statistical analysis                                                         */
+/*part5: statistical analysis                                                   */
 /*------------------------------------------------------------------------------*/
-/******************************************************/
+/********************************************************************************/
 
 
-/*part 0: import and back up the data-----------------------------------*/
- %macro impdata(data, name)/des="import data";
-       proc import
-          datafile="&data"
-          out=raw.&name
-          dbms=csv 
-          replace;
-          getnames=yes;
-          guessingrows=1000 ;
-       run;
+/*part 0: import and back up the data-------------------------------------------*/
+%macro impdata(data, name)/des="import data";
+   proc import
+        datafile="&data"
+        out=raw.&name
+        dbms=csv 
+        replace;
+        getnames=yes;
+        guessingrows=1000 ;
+    run;
 %mend impdata;
-%impdata(F:\Smoking cessation\dbo_MhbtQsData.txt, QsData); /* 3870723 observations, 44 variables*/
+%impdata(F:\Smoking cessation\dbo_MhbtQsData.txt, QsData); /*3870723 observations, 44 variables*/
 %impdata(F:\Smoking cessation\dbo_MhbtAgentPatient.txt, AP); /*1041225 observations, 16 variables*/
 %impdata(F:\Smoking cessation\dbo_MhbtQsCure.txt, QsCure); /*3162273 observations, 9 variables*/
-%impdata(F:\Smoking cessation\dbo_GenDrugBasic.txt, GDB); /* 60 observations and 10 variables*/
-%impdata(F:\Smoking cessation\dbo_HospContractType.txt, Hosp); /* 6445 observations and 5 variables*/
-%impdata(F:\Smoking cessation\dbo_HospBasic.txt, HospBasic); /* 6299 observations and 34 variables*/
+%impdata(F:\Smoking cessation\dbo_GenDrugBasic.txt, GDB); /*60 observations and 10 variables*/
+%impdata(F:\Smoking cessation\dbo_HospContractType.txt, Hosp); /*6445 observations and 5 variables*/
+%impdata(F:\Smoking cessation\dbo_HospBasic.txt, HospBasic); /*6299 observations and 34 variables*/
 %impdata(F:\Smoking cessation\short_6.txt, S6); /*283526 observations and 16 variables*/
-%impdata(F:\Smoking cessation\long_7B.txt, L7B);/*3000 observations and 41 variables.*/
+%impdata(F:\Smoking cessation\long_7B.txt, L7B); /*3000 observations and 41 variables.*/
 %impdata(F:\Smoking cessation\long_7B2.txt, L7B2); /*9000 observations and 31 variables*/
 
-data raw.L7a;/*41000 observations, 36 variables*/
-    set smoke.Long_7a_modified;
+data raw.L7a; /*41000 observations, 36 variables*/
+  set smoke.Long_7a_modified;
 run;
 
-/*part1: merge data, select the variables, modify the variable name*/
+/*part1: merge data, select the variables, modify the variable name-------------*/
 proc sql;
-    create table qscure_gdb as /*3162273 rows and 6 columns*/
-    select a.hospid, a.id, a.birthday, a.funcdate, a.cureitem, 
-             b.DrugIngredient
-    from raw.qscure as a left join raw.gdb as b
-    on (a.cureitem=b.drugno);
+  create table qscure_gdb as /*3162273 rows and 6 columns*/
+  select a.hospid, a.id, a.birthday, a.funcdate, a.cureitem, 
+         b.DrugIngredient
+  from raw.qscure as a left join raw.gdb as b
+  on (a.cureitem=b.drugno);
 
-    create table qsdata_qscure_gdb as /*4752290 rows and 12 columns*/
-    select distinct a.hospid, a.id, a.birthday, a.funcdate, a.firsttreatdate, a.curestage, 
-                         a.cure_type, a.smokedaynum, a.smokescore, a.cureweek, 
-                         b.DrugIngredient, b.cureitem
-    from raw.qsdata as a left join qscure_gdb as b
-    on (a.id=b.id) and (a.hospid=b.hospid) and (a.funcdate=b.funcdate);
+  create table qsdata_qscure_gdb as /*4752290 rows and 12 columns*/
+  select distinct a.hospid, a.id, a.birthday, a.funcdate, a.firsttreatdate, a.curestage, 
+                  a.cure_type, a.smokedaynum, a.smokescore, a.cureweek, 
+                  b.DrugIngredient, b.cureitem
+  from raw.qsdata as a left join qscure_gdb as b
+  on (a.id=b.id) and (a.hospid=b.hospid) and (a.funcdate=b.funcdate);
 
-   create table new.merge_data as /*4752290 rows and 21 columns*/
-   select a.*, b.f1, b.c1, b.b3, b.nct1, b.nct2, b.nct3, 
-            b.nqd1 format yymmdd10., 
-            b.nqd2 format yymmdd10., 
-            b.nqd3 format yymmdd10.
-   from qsdata_qscure_gdb as a left join raw.l7a as b
-   on (a.id=b.id) and (substr(a.firsttreatdate,1,6)=b.firstmonth) and (a.hospid=b.hospid);
+  create table new.merge_data as /*4752290 rows and 21 columns*/
+  select a.*, b.f1, b.c1, b.b3, b.nct1, b.nct2, b.nct3, 
+         b.nqd1 format yymmdd10., 
+         b.nqd2 format yymmdd10., 
+         b.nqd3 format yymmdd10.
+  from qsdata_qscure_gdb as a left join raw.l7a as b
+  on (a.id=b.id) and (substr(a.firsttreatdate,1,6)=b.firstmonth) and (a.hospid=b.hospid);
 quit;
 
 /*part2: modify variables--------------------------------------------------*/
 /*part2-1: modify error id-------------------------------------------------*/
 %include "F:\portfolio\code\subroutine_modify id.sas";
 
-/*part2-2: modify error birthday-----------------------------------------*/
+/*part2-2: modify error birthday-------------------------------------------*/
 %include "F:\portfolio\code\subroutine_modify bd.sas";
 
-/*part2-3: modify smokedaynum and smokescore--------------------*/
-/*¬Û¦Pdi, birthday, funcdate¡A¦ısmokedaynum©Îsmokescore¤£¦P (À³¬O¦Pµ§´NÂå¬ö¿ı)¡A¿ï³Ì¤j¦¨Å}«×­È¬°¨ä·í¤Ñ¤§´ú¶q­È*/
+/*part2-3: modify smokedaynum and smokescore-------------------------------*/
+/*ç›¸åŒdi, birthday, funcdateï¼Œä½†smokedaynumæˆ–smokescoreä¸åŒ (æ‡‰æ˜¯åŒç­†å°±é†«ç´€éŒ„)ï¼Œé¸æœ€å¤§æˆç™®åº¦å€¼ç‚ºå…¶ç•¶å¤©ä¹‹æ¸¬é‡å€¼*/
 proc sql;
-   create table new.adh_data as /* 4752290 rows and 24 columns*/
-   select *, max(SmokeDayNum) as newsdn, 
-            max(input(SmokeScore, best12.)) as newss
-   from new.bd_data
-   group by id, birthday, funcdate;
+  create table new.adh_data as /* 4752290 rows and 24 columns*/
+  select *, max(SmokeDayNum) as newsdn, 
+         max(input(SmokeScore, best12.)) as newss
+  from new.bd_data
+  group by id, birthday, funcdate;
 quit;
 
-/*part2-4: modify the format of the variables--------------------------*/
-/*1. «Ø·sªºid*/
-/*2. birthday¡Bfuncdate¡BfirsttreatdateÂà¬°¤é´Á®æ¦¡*/
+/*part2-4: modify the format of the variables------------------------------*/
+/*1. å»ºæ–°çš„id*/
+/*2. birthdayã€funcdateã€firsttreatdateè½‰ç‚ºæ—¥æœŸæ ¼å¼*/
 proc sql;
-    create table new.format_data as /*3938019 rows and 21 columns*/
-    select distinct hospid, id, f1, c1, b3 format best12., nct1, nct2, nct3, nqd1, nqd2, nqd3
-                         cats(id,birthday) as newid,
-	  	                 input(birthday, yymmdd10.) as bd format yymmdd10.,
-		                 input(funcdate, yymmdd10.) as funcdate format yymmdd10.,
-		                 input(firsttreatdate, yymmdd10.) as firstdate format yymmdd10.,
-		                 curestage, cure_type, newsdn, newss, cureweek, 
-                         case when substr(DrugIngredient,1,1)="V" then "V"
-						        when substr(DrugIngredient,1,1)="B" then "B"
-						 	    when substr(DrugIngredient,1,1)="N" then "N"
-							    else " " 
-						 end as drug
+  create table new.format_data as /*3938019 rows and 21 columns*/
+  select distinct hospid, id, f1, c1, b3 format best12., nct1, nct2, nct3, nqd1, nqd2, nqd3
+         cats(id,birthday) as newid,
+	 input(birthday, yymmdd10.) as bd format yymmdd10.,
+	 input(funcdate, yymmdd10.) as funcdate format yymmdd10.,
+	 input(firsttreatdate, yymmdd10.) as firstdate format yymmdd10.,
+	 curestage, cure_type, newsdn, newss, cureweek, 
+         case when substr(DrugIngredient,1,1)="V" then "V"
+	      when substr(DrugIngredient,1,1)="B" then "B"
+	      when substr(DrugIngredient,1,1)="N" then "N"
+	      else " " 
+	 end as drug
    from new.adh_data;
 quit;
 
 /*part3: screening sample-------------------------------------------------*/
-/*1. ªvÀøªÌ*/
-/*2. ­º¦¸´N¶E¦b¿ï¼Ë´Á¶¡ªÌªº¸ÓÀøµ{¬ö¿ı*/
-/*3. ­º¦¸´N¶E¦~ÄÖ>=18·³ªÌ*/
-/*4. ­º¦¸Àøµ{¦³6­Ó¤ëfollow up ¬ö¿ı*/
+/*1. æ²»ç™‚è€…*/
+/*2. é¦–æ¬¡å°±è¨ºåœ¨é¸æ¨£æœŸé–“è€…çš„è©²ç™‚ç¨‹ç´€éŒ„*/
+/*3. é¦–æ¬¡å°±è¨ºå¹´é½¡>=18æ­²è€…*/
+/*4. é¦–æ¬¡ç™‚ç¨‹æœ‰6å€‹æœˆfollow up ç´€éŒ„*/
 proc sql; 
-    create table new.screen_data as/*6574 rows and 22 columns*/
-    select distinct *, floor(yrdif(bd, min(firstdate), 'age')) as firstage
-    from new.format_data
-    where (Cure_Type="1") and (curestage="1")
-    group by newid
-    having (firstdate=min(firstdate)) and
-               (mdy(2,1,2015)<=min(firstdate)<=mdy(1,31,2016) or
-                mdy(6,12,2017)<=min(firstdate)<=mdy(6,11,2018)) and
-               (firstage>=18) and
-               ((nct1=0) or (nct2=0) or (nct3=0));
+  create table new.screen_data as/*6574 rows and 22 columns*/
+  select distinct *, floor(yrdif(bd, min(firstdate), 'age')) as firstage
+  from new.format_data
+  where (Cure_Type="1") and (curestage="1")
+  group by newid
+  having (firstdate=min(firstdate)) and
+         (mdy(2,1,2015)<=min(firstdate)<=mdy(1,31,2016) or
+          mdy(6,12,2017)<=min(firstdate)<=mdy(6,11,2018)) and
+         (firstage>=18) and
+         ((nct1=0) or (nct2=0) or (nct3=0));
 quit;
 
-/*part4: create variables which in reserch------------------------------*/
-proc sql; /*«Ø¥ß·sÄæ¦ì: adh, usedrug, addweek*/
-    create table adh as /*3336 rows and 2 columns*/
-	select newid, sum(cureweek) as adh
-	from (select distinct newid, funcdate, cureweek from new.screen_data)
-	group by newid;
+/*part4: create variables which in reserch--------------------------------*/
+proc sql; /*å»ºç«‹æ–°æ¬„ä½: adh, usedrug, addweek*/
+  create table adh as /*3336 rows and 2 columns*/
+  select newid, sum(cureweek) as adh
+  from (select distinct newid, funcdate, cureweek from new.screen_data)
+  group by newid;
 
-    create table usedrug as /*3336 rows and 2 columns*/
-	select distinct newid, case when (count(drug)=1) and (drug="V") then 0 
-	                                      when (count(drug)=1) and (drug="B") then 1
-                                          when (count(drug)=1) and (drug="N") then 2 
-							              when (count(drug)>1) then 3
-                                          else . 
-                                   end as usedrug 
-	from (select distinct newid, drug from new.screen_data where drug not in (" "))/*·í¦³´Xµ§¸ê®ÆµLªk±oª¾­şºØÃÄ®É«h¤£¦C¤J¤ÀÃş¡A¶È¥H±oª¾ªº¸ê®Æ§PÂ_¦¹¤HÄİ©ó­şºØ¥ÎÃÄÃş§O*/
-	group by newid;
+  create table usedrug as /*3336 rows and 2 columns*/
+  select distinct newid, case when (count(drug)=1) and (drug="V") then 0 
+	                      when (count(drug)=1) and (drug="B") then 1
+                              when (count(drug)=1) and (drug="N") then 2 
+			      when (count(drug)>1) then 3
+                              else . 
+                         end as usedrug 
+   from (select distinct newid, drug from new.screen_data where drug not in (" "))/*ç•¶æœ‰å¹¾ç­†è³‡æ–™ç„¡æ³•å¾—çŸ¥å“ªç¨®è—¥æ™‚å‰‡ä¸åˆ—å…¥åˆ†é¡ï¼Œåƒ…ä»¥å¾—çŸ¥çš„è³‡æ–™åˆ¤æ–·æ­¤äººå±¬æ–¼å“ªç¨®ç”¨è—¥é¡åˆ¥*/
+   group by newid;
 
-	create table addweek as /*444 rows and 2 columns*/
-	select newid, sum(cureweek) as addweek
-	from (select distinct a.newid, a.funcdate, a.cureweek, b.firstdate
-	         from new.format_data as a left join new.screen_data as b
-	         on a.newid=b.newid
-	         where (a.newid in (select newid from new.screen_data)) and (a.cure_type="1")
-	         having b.firstdate+90<a.funcdate<b.firstdate+180)
-	group by newid;
+   create table addweek as /*444 rows and 2 columns*/
+   select newid, sum(cureweek) as addweek
+   from (select distinct a.newid, a.funcdate, a.cureweek, b.firstdate
+	 from new.format_data as a left join new.screen_data as b
+	 on a.newid=b.newid
+	 where (a.newid in (select newid from new.screen_data)) and (a.cure_type="1")
+	 having b.firstdate+90<a.funcdate<b.firstdate+180)
+    group by newid;
 
-	create table adh_usedrug as /* 3336 rows and 3 columns*/
-	select a.*, b.usedrug
-	from adh as a left join usedrug as b
-	on a.newid=b.newid;
+    create table adh_usedrug as /*3336 rows and 3 columns*/
+    select a.*, b.usedrug
+    from adh as a left join usedrug as b
+    on a.newid=b.newid;
 
-	create table var as /*3336 rows and 4 columns*/
-	select distinct a.*, b.addweek
-	from adh_usedrug as a left join addweek as b
-	on a.newid=b.newid;
+    create table var as /*3336 rows and 4 columns*/
+    select distinct a.*, b.addweek
+    from adh_usedrug as a left join addweek as b
+    on a.newid=b.newid;
 quit;
 
-proc sql; /*±NÄæ¦ì¤ÀÃş¡B«Ø·sÄæ¦ì*/
-    create table new.analysis as /*3324 rows and 16 columns*/
-	select distinct a.id, a.newid, a.firstage, a.newss as firstftnd, a.newsdn as firstsdn, b.adh, b.usedrug,
-             case when mdy(2,1,2015)<=a.firstdate<=mdy(1,31,2016) then 0
-	                when mdy(6,12,2017)<=a.firstdate<=mdy(6,11,2018) then 1
-	                else . 
-	         end as tax2,
-			 case when 18<=a.firstage<=29 then 0
-                    when 30<=a.firstage<=49 then 1
-					when 50<=a.firstage<=64 then 2
-					when a.firstage>=65 then 3
-					else .
-			 end as casefirstage,
-			 case when substr(a.id,2,1)="1" then 0
-			        when substr(a.id,2,1)="2" then 1
-				    else .
-			 end as sex,
-			 case when a.f1 in (1, 2) then 0
-			        when a.f1=3 then 1
-					when a.f1=4 then 2
-					when a.f1 in (5, 6) then 3
-					else .
-			 end as edu,
-			 case when a.c1 in (991, 0) then 0
-			        when a.c1 in (1-10) then 1
-					else . 
-			 end as famsmoker,
-			 case when a.newss in (0, 1, 2, 3) then 0
-			        when a.newss in (4, 5, 6) then 1
-					when a.newss in (7, 8, 9, 10) then 2
-					else .
-			 end as casefirstftnd,
-			 case when a.newsdn<=10 then 0
-			        when 11<=a.newsdn<=20 then 1
-			        when 21<=a.newsdn<=30 then 2
-				    when a.newsdn>=31 then 3
-				    else .
-			 end as casefirstsdn,
-			 case when a.b3 in (1, 2, 3) then 0
-				    when a.b3 in (4, 5) then 1
-			        else .
-			 end as quit,
-			 case when b.addweek>0 then b.addweek
-			        when b.addweek=. then 0
-					else .
-			 end as addweek
-    from new.screen_data as a left join var as b
-	on a.newid=b.newid
-    group by a.newid
-    having (funcdate=firstdate) and quit^=.;/*¦³12¤Hªºquit¥¼ª¾¡A¨Ì¿z¿ï±ø¥ó¤£¯Ç¤J¼Ë¥»¤¤*/
+proc sql; /*å°‡æ¬„ä½åˆ†é¡ã€å»ºæ–°æ¬„ä½*/
+  create table new.analysis as /*3324 rows and 16 columns*/
+  select distinct a.id, a.newid, a.firstage, a.newss as firstftnd, a.newsdn as firstsdn, b.adh, b.usedrug,
+                  case when mdy(2,1,2015)<=a.firstdate<=mdy(1,31,2016) then 0
+	               when mdy(6,12,2017)<=a.firstdate<=mdy(6,11,2018) then 1
+	               else . 
+	          end as tax2,
+	          case when 18<=a.firstage<=29 then 0
+                       when 30<=a.firstage<=49 then 1
+		       when 50<=a.firstage<=64 then 2
+		       when a.firstage>=65 then 3
+		       else .
+		   end as casefirstage,
+	           case when substr(a.id,2,1)="1" then 0
+			when substr(a.id,2,1)="2" then 1
+			else .
+		   end as sex,
+	           case when a.f1 in (1, 2) then 0
+			when a.f1=3 then 1
+			when a.f1=4 then 2
+			when a.f1 in (5, 6) then 3
+			else .
+		   end as edu,
+		   case when a.c1 in (991, 0) then 0
+			when a.c1 in (1-10) then 1
+			else . 
+		   end as famsmoker,
+		   case when a.newss in (0, 1, 2, 3) then 0
+			when a.newss in (4, 5, 6) then 1
+			when a.newss in (7, 8, 9, 10) then 2
+			else .
+		   end as casefirstftnd,
+		   case when a.newsdn<=10 then 0
+			when 11<=a.newsdn<=20 then 1
+			when 21<=a.newsdn<=30 then 2
+			when a.newsdn>=31 then 3
+			else .
+		   end as casefirstsdn,
+		   case when a.b3 in (1, 2, 3) then 0
+			when a.b3 in (4, 5) then 1
+			else .
+		   end as quit,
+		   case when b.addweek>0 then b.addweek
+			when b.addweek=. then 0
+			else .
+		   end as addweek
+  from new.screen_data as a left join var as b
+  on a.newid=b.newid
+  group by a.newid
+  having (funcdate=firstdate) and quit^=.;/*æœ‰12äººçš„quitæœªçŸ¥ï¼Œä¾ç¯©é¸æ¢ä»¶ä¸ç´å…¥æ¨£æœ¬ä¸­*/
 quit;
 
 /*part5: statistical analysis------------------------------------------------*/
-/*´y­z©Ê²Î­p*/
+/*æè¿°æ€§çµ±è¨ˆ*/
 proc ttest data=new.analysis;
-    class tax2;
-    var firstage adh addweek;
+  class tax2;
+  var firstage adh addweek;
 run;
 
 proc freq data=new.analysis;
-    table tax2*(sex casefirstage edu casefirstsdn casefirstftnd famsmoker usedrug)/chisq;
+  table tax2*(sex casefirstage edu casefirstsdn casefirstftnd famsmoker usedrug)/chisq;
 run;
 
-/*±À½×©Ê²Î­p*/
+/*æ¨è«–æ€§çµ±è¨ˆ*/
 proc genmod data=new.analysis;
-    class tax2 (ref="0")
-            sex (ref="0")
-		    casefirstage (ref="0")
-		    edu (ref="0")
-		    casefirstsdn (ref="0")
-		    casefirstftnd (ref="0")
-		    famsmoker (ref="0")
-		    usedrug (ref="0");
-	 where edu^=. and famsmoker^=.;
-	 model adh=tax2 sex casefirstage edu casefirstsdn casefirstftnd famsmoker usedrug/dist=poisson link=log dscale;
+  class tax2 (ref="0")
+        sex (ref="0")
+	casefirstage (ref="0")
+	edu (ref="0")
+	casefirstsdn (ref="0")
+	casefirstftnd (ref="0")
+	famsmoker (ref="0")
+	usedrug (ref="0");
+  where edu^=. and famsmoker^=.;
+  model adh=tax2 sex casefirstage edu casefirstsdn casefirstftnd famsmoker usedrug/dist=poisson link=log dscale;
 run;
