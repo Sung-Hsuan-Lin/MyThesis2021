@@ -1,116 +1,115 @@
 /*********************************modify birthday**********************************/
-/*1562µ§id¦³¦hµ§¤£¦Pªºbirthday                                                                                            */
-/*¥H³B²z1¬°Àu¥ı³B²z¤è¦¡¡A¦p¹JµLªk³B²zªÌ¤~¨Ï¥Î³B²z2©Î³B²z3¤è¦¡¶i¦æ                     */
-/*  ³B²z1. ¿ï¥X²{¦¸¼Æ³Ì¦hªº¥Í¤é§@¬°¥D­n¥Í¤é                                                                  */
-/*  ³B²z2. ¦Pµ§id, ¤£¦Pbirthday¥B©m¤ó¬Û¦P®É¡A«h¿ï²Ä¤@µ§¥X²{ªºbirthday§@¬°¸Óidªº¥Í¤é*/
-/*  ³B²z3. ¦Pµ§id, ¤£¦Pbirthday¥B¦W¦r¬Û¦P®É¡A«h¿ï²Ä¤@µ§¥X²{ªºbirthday§@¬°¸Óidªº¥Í¤é*/
-/* ¦p¥H¤W¤TºØ³B²z¤è¦¡¬ÒµLªk¤À¿ë¸Óµ§idªº¥Í¤é®É¡A«h§P©w¦Pid¤£¦Pbirthday¬°¤£¦P¤H   */
-/********************************************************************************/
+/*1562ç­†idæœ‰å¤šç­†ä¸åŒçš„birthday                                                     */
+/*ä»¥è™•ç†1ç‚ºå„ªå…ˆè™•ç†æ–¹å¼ï¼Œå¦‚é‡ç„¡æ³•è™•ç†è€…æ‰ä½¿ç”¨è™•ç†2æˆ–è™•ç†3æ–¹å¼é€²è¡Œ                      */
+/*  è™•ç†1. é¸å‡ºç¾æ¬¡æ•¸æœ€å¤šçš„ç”Ÿæ—¥ä½œç‚ºä¸»è¦ç”Ÿæ—¥                                          */
+/*  è™•ç†2. åŒç­†id, ä¸åŒbirthdayä¸”å§“æ°ç›¸åŒæ™‚ï¼Œå‰‡é¸ç¬¬ä¸€ç­†å‡ºç¾çš„birthdayä½œç‚ºè©²idçš„ç”Ÿæ—¥   */
+/*  è™•ç†3. åŒç­†id, ä¸åŒbirthdayä¸”åå­—ç›¸åŒæ™‚ï¼Œå‰‡é¸ç¬¬ä¸€ç­†å‡ºç¾çš„birthdayä½œç‚ºè©²idçš„ç”Ÿæ—¥   */
+/* å¦‚ä»¥ä¸Šä¸‰ç¨®è™•ç†æ–¹å¼çš†ç„¡æ³•åˆ†è¾¨è©²ç­†idçš„ç”Ÿæ—¥æ™‚ï¼Œå‰‡åˆ¤å®šåŒidä¸åŒbirthdayç‚ºä¸åŒäºº          */
+/*********************************************************************************/
 proc sort data=new.id_data;by id funcdate;run;
-proc sql; /*±Nid_dataÀÉ«Ø¥ß§Ç¸¹*/
-   create table row as/*4752290 rows and 22 columns*/
-   select monotonic() as row_id, *
-   from new.id_data
-   order by id, funcdate;
+proc sql; /*å°‡id_dataæª”å»ºç«‹åºè™Ÿ*/
+  create table row as/*4752290 rows and 22 columns*/
+  select monotonic() as row_id, *
+  from new.id_data
+  order by id, funcdate;
 quit;
 
-proc sql; /*5162µ§id¦³¤£¦Pbd¡A¦@56405µ§¸ê®Æ*/
-   create table bd1 as /*5162 rows and 1 columns*/
-   select distinct id
-   from (select distinct id, birthday from row)
-   group by id
-   having count(birthday)>1
-   order by id;
+proc sql; /*5162ç­†idæœ‰ä¸åŒbdï¼Œå…±56405ç­†è³‡æ–™*/
+  create table bd1 as /*5162 rows and 1 columns*/
+  select distinct id
+  from (select distinct id, birthday from row)
+  group by id
+  having count(birthday)>1
+  order by id;
 quit;
 
-/*³B²z1. ¿ï¥X²{¦¸¼Æ³Ì¦hªº¥Í¤é§@¬°¥D­n¥Í¤é---------------------------------------------------------*/
-proc sql;/*¦³4095µ§id¥i¥H¥Î¦¹¤èªk*/
-/*­pºâ¨Cµ§bd¥X²{ªº¦¸¼Æ*/
-   create table bd2 as /*6199 rows (5162µ§id) and 3 columns*/
-   select distinct id, birthday, nbd
-   from (select *, count(birthday) as nbd from row where id in (select id from bd1) group by id, birthday )
-   group by id
-   having nbd=max(nbd);
+/*è™•ç†1. é¸å‡ºç¾æ¬¡æ•¸æœ€å¤šçš„ç”Ÿæ—¥ä½œç‚ºä¸»è¦ç”Ÿæ—¥-------------------------------------------*/
+proc sql;/*æœ‰4095ç­†idå¯ä»¥ç”¨æ­¤æ–¹æ³•*/
+/*è¨ˆç®—æ¯ç­†bdå‡ºç¾çš„æ¬¡æ•¸*/
+  create table bd2 as /*6199 rows (5162ç­†id) and 3 columns*/
+  select distinct id, birthday, nbd
+  from (select *, count(birthday) as nbd from row where id in (select id from bd1) group by id, birthday )
+  group by id
+  having nbd=max(nbd);
 
-   create table bd3 as /*65194 rows (4095µ§id) and 3 columns*/
-   select a.row_id, a.id, b.birthday
-   from row as a left join bd2 as b
-   on a.id=b.id
-   where a.id in (select id from bd2 group by id having count(birthday)=1)
-   order by a.id, b.birthday;
+  create table bd3 as /*65194 rows (4095ç­†id) and 3 columns*/
+  select a.row_id, a.id, b.birthday
+  from row as a left join bd2 as b
+  on a.id=b.id
+  where a.id in (select id from bd2 group by id having count(birthday)=1)
+  order by a.id, b.birthday;
 quit;
 
-/*³B²z2. ¦Pµ§id, ¤£¦Pbirthday¥B©m¤ó¬Û¦P®É¡A«h¿ï²Ä¤@µ§¥X²{ªºbirthday§@¬°¸Óidªº¥Í¤é--*/
-proc sql; /*¦³941µ§id¥i¥Î¦¹¤èªk*/
-   create table bd4 as/*1155 rows and 4 columns*/
-   select distinct a.row_id, a.id, a.birthday, b.name
-   from row as a left join raw.ap as b
-   on (a.id=b.id) and (a.hospid=b.hospid) and (a.birthday=b.birthday)
-   where a.id in (select distinct id from bd2 group by id having count(birthday)>1)
-   group by a.id, substr(b.name,1,2)
-   having (a.row_id=min(a.row_id))
-   order by row_id, id, birthday;
+/*è™•ç†2. åŒç­†id, ä¸åŒbirthdayä¸”å§“æ°ç›¸åŒæ™‚ï¼Œå‰‡é¸ç¬¬ä¸€ç­†å‡ºç¾çš„birthdayä½œç‚ºè©²idçš„ç”Ÿæ—¥-----*/
+proc sql; /*æœ‰941ç­†idå¯ç”¨æ­¤æ–¹æ³•*/
+  create table bd4 as/*1155 rows and 4 columns*/
+  select distinct a.row_id, a.id, a.birthday, b.name
+  from row as a left join raw.ap as b
+  on (a.id=b.id) and (a.hospid=b.hospid) and (a.birthday=b.birthday)
+  where a.id in (select distinct id from bd2 group by id having count(birthday)>1)
+  group by a.id, substr(b.name,1,2)
+  having (a.row_id=min(a.row_id))
+  order by row_id, id, birthday;
 
-   create table bd5 as/*3193 rows (941µ§id) and 3 columns*//**/
-   select distinct a.row_id, a.id, b.birthday
-   from row as a left join bd4 as b
-   on a.id=b.id
-   where a.id in (select id from bd4 group by id having count(birthday)=1)
-   order by id;
+  create table bd5 as /*3193 rows (941ç­†id) and 3 columns*//**/
+  select distinct a.row_id, a.id, b.birthday
+  from row as a left join bd4 as b
+  on a.id=b.id
+  where a.id in (select id from bd4 group by id having count(birthday)=1)
+  order by id;
 quit;
 
-/*³B²z3. ¦Pµ§id, ¤£¦Pbirthday¥B¦W¦r¬Û¦P®É¡A«h¿ï²Ä¤@µ§¥X²{ªºbirthday§@¬°¸Óidªº¥Í¤é--*/
-proc sql;/*¦³13µ§id¥i¥H¥Î¦¹¤èªk*/
-   create table bd6 as/* 228 rows and 4 columns*/
-   select *
-   from (select * from bd4 where id not in (select id from bd5))
-   group by id, substr(name,3,4)
-   having row_id=min(row_id);
-
-   create table bd7 as/*28 rows(13µ§id) and 3 columns*//**/
-   select a.row_id, a.id, b.birthday
-   from row as a left join bd6 as b
-   on a.id=b.id
-   where a.id in (select id from bd6 group by id having count(birthday)=1);
+/*è™•ç†3. åŒç­†id, ä¸åŒbirthdayä¸”åå­—ç›¸åŒæ™‚ï¼Œå‰‡é¸ç¬¬ä¸€ç­†å‡ºç¾çš„birthdayä½œç‚ºè©²idçš„ç”Ÿæ—¥-----*/
+proc sql; /*æœ‰13ç­†idå¯ä»¥ç”¨æ­¤æ–¹æ³•*/
+  create table bd6 as /*228 rows and 4 columns*/
+  select *
+  from (select * from bd4 where id not in (select id from bd5))
+  group by id, substr(name,3,4)
+  having row_id=min(row_id);
+   
+  create table bd7 as /*28 rows(13ç­†id) and 3 columns*//**/
+  select a.row_id, a.id, b.birthday
+  from row as a left join bd6 as b
+  on a.id=b.id
+  where a.id in (select id from bd6 group by id having count(birthday)=1);
 quit;
 
-/*¦p¥H¤W¤TºØ³B²z¤è¦¡¬ÒµLªk¤À¿ë¸Óµ§idªº¥Í¤é®É¡A«h§P©w¦Pid¤£¦Pbirthday¬°¤£¦P¤H----*/
-proc sql; /*113µ§id¦³¦hµ§birthdayªí¥Ü¬°¤£¦P¤H*/
-   create table bd8 as/* 286 rows and 3 columns*/
-   select row_id, id, birthday
-   from row
-   where id in (select id from bd6 where id not in (select id from bd7));
+/*å¦‚ä»¥ä¸Šä¸‰ç¨®è™•ç†æ–¹å¼çš†ç„¡æ³•åˆ†è¾¨è©²ç­†idçš„ç”Ÿæ—¥æ™‚ï¼Œå‰‡åˆ¤å®šåŒidä¸åŒbirthdayç‚ºä¸åŒäºº----------*/
+proc sql; /*113ç­†idæœ‰å¤šç­†birthdayè¡¨ç¤ºç‚ºä¸åŒäºº*/
+  create table bd8 as /*286 rows and 3 columns*/
+  select row_id, id, birthday
+  from row
+  where id in (select id from bd6 where id not in (select id from bd7));
 quit;
 
-/*modify birthday-------------------------------------------------------------------------------------------------*/
+/*modify birthday----------------------------------------------------------------*/
 data bd9; /*68415 rows and 3 columns*/
-   set bd3 bd5 bd7;
+  set bd3 bd5 bd7;
 run;
 
 proc sql;
-   create table bd10 as /*68415 rows and 22 columns*/
-   select a.*, b.birthday
-   from row (drop=birthday) as a left join bd9 as b
-   on a.row_id=b.row_id
-   where a.row_id in (select row_id from bd9);
+  create table bd10 as /*68415 rows and 22 columns*/
+  select a.*, b.birthday
+  from row (drop=birthday) as a left join bd9 as b
+  on a.row_id=b.row_id
+  where a.row_id in (select row_id from bd9);
 
-   create table new.bd_data as /*4752290 rows and 22 columns*/
-   select *
-   from (select * from row where row_id not in (select row_id from bd10))
-   union all
-   select row_id, hospid, id, birthday, funcdate, FirstTreatDate, CureStage, Cure_Type, 
-            SmokeDayNum, SmokeScore, CureWeek, DrugIngredient, cureitem, 
-            f1, c1, b3, nct1, nct2, nct3, nqd1, nqd2, nqd3
-   from bd10;
+  create table new.bd_data as /*4752290 rows and 22 columns*/
+  select *
+  from (select * from row where row_id not in (select row_id from bd10))
+  union all
+  select row_id, hospid, id, birthday, funcdate, FirstTreatDate, CureStage, Cure_Type, 
+         SmokeDayNum, SmokeScore, CureWeek, DrugIngredient, cureitem, 
+         f1, c1, b3, nct1, nct2, nct3, nqd1, nqd2, nqd3
+  from bd10;
 quit;
 
-/*§R°£¤£­nªº¼È¦sÀÉ-------------------------------------------------------------------------------------------*/
+/*åˆªé™¤ä¸è¦çš„æš«å­˜æª”----------------------------------------------------------------------*/
 %macro bd(n1,n2);
-      %do n=&n1 %to &n2;
-              proc delete 
-                 data=bd&n;
-              run;
-      %end;
+  %do n=&n1 %to &n2;
+    proc delete 
+      data=bd&n;
+    run;
+   %end;
 %mend bd;
-
 %bd(1,10);
