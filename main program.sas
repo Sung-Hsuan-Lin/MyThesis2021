@@ -96,7 +96,7 @@ quit;
 /*2. birthday、funcdate、firsttreatdate轉為日期格式*/
 proc sql;
   create table new.format_data as /*3938019 rows and 21 columns*/
-  select distinct hospid, id, f1, c1, b3 format best12., nct1, nct2, nct3, nqd1, nqd2, nqd3
+  select distinct hospid, id, f1, c1, b3 format best12., nct1, nct2, nct3, nqd1, nqd2, nqd3,
          cats(id,birthday) as newid,
 	 input(birthday, yymmdd10.) as bd format yymmdd10.,
 	 input(funcdate, yymmdd10.) as funcdate format yymmdd10.,
