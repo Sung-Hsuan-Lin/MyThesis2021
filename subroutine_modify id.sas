@@ -28,7 +28,7 @@ quit;
 
 data r_id ; /*156 observations and 23 variables*/
   set w1 w2 w3;
-  where id2^="A124355290";
+  where id2^="A12ooooooo";
 run;
 
 proc sql;
