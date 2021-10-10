@@ -50,7 +50,7 @@ data raw.L7a; /*41000 observations, 36 variables*/
   set smoke.Long_7a_modified;
 run;
 
-/*part1: merge data, select the variables, modify the variable name-------------*/
+/*part1: merge data, select the variables---------------------------------------*/
 proc sql;
   create table qscure_gdb as /*3162273 rows and 6 columns*/
   select a.hospid, a.id, a.birthday, a.funcdate, a.cureitem, 
