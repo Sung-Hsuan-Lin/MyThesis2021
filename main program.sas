@@ -8,7 +8,7 @@ libname smoke "F:\Smoking cessation"; /*original dataset*/
 /*------------------------------------------------------------------------------*/
 /*part 0: import and back up the data                                           */
 /*------------------------------------------------------------------------------*/
-/*part1: merge data, select the variables, modify the variable name             */
+/*part1: merge data, select the variables                                       */
 /*------------------------------------------------------------------------------*/
 /*part2: modify variables                                                       */
 /*  part2-1: modify error id                                                    */
