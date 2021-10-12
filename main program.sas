@@ -28,7 +28,7 @@ libname smoke "F:\Smoking cessation"; /*original dataset*/
 /*part 0: import and back up the data-------------------------------------------*/
 %macro impdata(data, name)/des="import data";
    proc import
-        datafile="&data"
+        datafile="F:\Smoking cessation\&data"
         out=raw.&name
         dbms=csv 
         replace;
@@ -36,15 +36,9 @@ libname smoke "F:\Smoking cessation"; /*original dataset*/
         guessingrows=1000 ;
     run;
 %mend impdata;
-%impdata(F:\Smoking cessation\dbo_MhbtQsData.txt, QsData); /*3870723 observations, 44 variables*/
-%impdata(F:\Smoking cessation\dbo_MhbtAgentPatient.txt, AP); /*1041225 observations, 16 variables*/
-%impdata(F:\Smoking cessation\dbo_MhbtQsCure.txt, QsCure); /*3162273 observations, 9 variables*/
-%impdata(F:\Smoking cessation\dbo_GenDrugBasic.txt, GDB); /*60 observations and 10 variables*/
-%impdata(F:\Smoking cessation\dbo_HospContractType.txt, Hosp); /*6445 observations and 5 variables*/
-%impdata(F:\Smoking cessation\dbo_HospBasic.txt, HospBasic); /*6299 observations and 34 variables*/
-%impdata(F:\Smoking cessation\short_6.txt, S6); /*283526 observations and 16 variables*/
-%impdata(F:\Smoking cessation\long_7B.txt, L7B); /*3000 observations and 41 variables.*/
-%impdata(F:\Smoking cessation\long_7B2.txt, L7B2); /*9000 observations and 31 variables*/
+%impdata(dbo_MhbtQsData.txt, QsData); /*3870723 observations, 44 variables*/
+%impdata(dbo_MhbtQsCure.txt, QsCure); /*3162273 observations, 9 variables*/
+%impdata(dbo_GenDrugBasic.txt, GDB); /*60 observations and 10 variables*/
 
 data raw.L7a; /*41000 observations, 36 variables*/
   set smoke.Long_7a_modified;
