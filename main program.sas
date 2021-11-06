@@ -46,26 +46,21 @@ run;
 
 /*part1: merge data, select the variables---------------------------------------*/
 proc sql;
-  create table qscure_gdb as /*3162273 rows and 6 columns*/
-  select a.hospid, a.id, a.birthday, a.funcdate, a.cureitem, 
-         b.DrugIngredient
-  from raw.qscure as a left join raw.gdb as b
-  on (a.cureitem=b.drugno);
-
-  create table qsdata_qscure_gdb as /*4752290 rows and 12 columns*/
+  create table new.merge_data as  /*4752290 rows and 21 columns*/
   select distinct a.hospid, a.id, a.birthday, a.funcdate, a.firsttreatdate, a.curestage, 
                   a.cure_type, a.smokedaynum, a.smokescore, a.cureweek, 
-                  b.DrugIngredient, b.cureitem
-  from raw.qsdata as a left join qscure_gdb as b
-  on (a.id=b.id) and (a.hospid=b.hospid) and (a.funcdate=b.funcdate);
-
-  create table new.merge_data as /*4752290 rows and 21 columns*/
-  select a.*, b.f1, b.c1, b.b3, b.nct1, b.nct2, b.nct3, 
-         b.nqd1 format yymmdd10., 
-         b.nqd2 format yymmdd10., 
-         b.nqd3 format yymmdd10.
-  from qsdata_qscure_gdb as a left join raw.l7a as b
-  on (a.id=b.id) and (substr(a.firsttreatdate,1,6)=b.firstmonth) and (a.hospid=b.hospid);
+                  b.cureitem, c.DrugIngredient,  
+                  d.f1, d.c1, d.b3, d.nct1, d.nct2, d.nct3, 
+                  d.nqd1 format yymmdd10., 
+                  d.nqd2 format yymmdd10., 
+                  d.nqd3 format yymmdd10.
+  from raw.qsdata as a 
+  left join raw.qscure as b 
+  on (a.id=b.id) and (a.hospid=b.hospid) and (a.funcdate=b.funcdate)
+  left join raw.gdb as c
+  on (b.cureitem=c.drugno)
+  left join raw.l7a as d
+  on (a.id=d.id) and (substr(a.firsttreatdate,1,6)=d.firstmonth) and (a.hospid=d.hospid);
 quit;
 
 /*part2: modify variables--------------------------------------------------*/
